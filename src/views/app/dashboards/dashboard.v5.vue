@@ -5,7 +5,7 @@
     <b-row>
       <b-col md="12" class="mb-30">
         <b-card class="h-100">
-          <b-dropdown
+          <!-- <b-dropdown
             variant="primary"
             id="dropdown-1"
             text="Month"
@@ -23,15 +23,20 @@
             <b-dropdown-item>October</b-dropdown-item>
             <b-dropdown-item>November</b-dropdown-item>
             <b-dropdown-item>December</b-dropdown-item>
-          </b-dropdown>
+          </b-dropdown> -->
           <b-dropdown
             variant="primary"
             id="dropdown-1"
+            v-model="form.year"
             text="Year"
             class="mb-2 mr-2"
+            
           >
-            <b-dropdown-item>2020</b-dropdown-item>
-            <b-dropdown-item>2021</b-dropdown-item>
+            <b-dropdown-item v-for="year in years" 
+                    :key="year.value" 
+                    :value="year.value"
+                    @click="getData(year.value)">{{ year.value }}</b-dropdown-item>
+            <!-- <b-dropdown-item >2021</b-dropdown-item> -->
           </b-dropdown>
         </b-card>
       </b-col>
@@ -47,7 +52,7 @@
                 <p class="text-muted mt-2 mb-2">
                   Total Programs Running <br />
                 </p>
-                <p class="text-primary text-24 line-height-1 m-0">218</p>
+                <p class="text-primary text-24 line-height-1 m-0">{{ program_count || 0}}</p>
               </b-card>
             </b-col>
             <b-col lg="4" md="6" sm="6">
@@ -74,7 +79,7 @@
                 <p class="text-muted mt-2 mb-2">
                   Deck Cadets
                 </p>
-                <p class="line-height-1 text-title text-18 mt-2 mb-0">17</p>
+                <p class="line-height-1 text-title text-18 mt-2 mb-0">{{userCounts[3].count}}</p>
               </b-card>
             </b-col>
             <b-col lg="2" md="6" sm="6">
@@ -83,7 +88,7 @@
                 <p class="text-muted mt-2 mb-2">
                   Engine Cadets
                 </p>
-                <p class="line-height-1 text-title text-18 mt-2 mb-0">17</p>
+                <p class="line-height-1 text-title text-18 mt-2 mb-0">{{userCounts[4].count || 0}}</p>
               </b-card>
             </b-col>
             <b-col lg="2" md="6" sm="6">
@@ -92,7 +97,7 @@
                 <p class="text-muted mt-2 mb-2">
                   Fourth Engineer
                 </p>
-                <p class="line-height-1 text-title text-18 mt-2 mb-0">9</p>
+                <p class="line-height-1 text-title text-18 mt-2 mb-0">{{userCounts[6].count || 0}}</p>
               </b-card>
             </b-col>
             <b-col lg="2" md="6" sm="6">
@@ -101,7 +106,7 @@
                 <p class="text-muted mt-2 mb-2">
                   Third Engineer
                 </p>
-                <p class="line-height-1 text-title text-18 mt-2 mb-0">8</p>
+                <p class="line-height-1 text-title text-18 mt-2 mb-0">{{userCounts[11].count || 0}}</p>
               </b-card>
             </b-col>
             <b-col lg="2" md="6" sm="6">
@@ -110,7 +115,7 @@
                 <p class="text-muted mt-2 mb-2">
                   Second Engineer
                 </p>
-                <p class="line-height-1 text-title text-18 mt-2 mb-0">8</p>
+                <p class="line-height-1 text-title text-18 mt-2 mb-0">{{userCounts[9].count || 0}}</p>
               </b-card>
             </b-col>
             <b-col lg="2" md="6" sm="6">
@@ -119,7 +124,7 @@
                 <p class="text-muted mt-2 mb-2">
                   Chief Engineer
                 </p>
-                <p class="line-height-1 text-title text-18 mt-2 mb-0">6</p>
+                <p class="line-height-1 text-title text-18 mt-2 mb-0">{{userCounts[1].count || 0}}</p>
               </b-card>
             </b-col>
             <b-col lg="4" md="6" sm="6">
@@ -128,7 +133,7 @@
                 <p class="text-muted mt-2 mb-2">
                   Third Officer
                 </p>
-                <p class="line-height-1 text-title text-18 mt-2 mb-0">10</p>
+                <p class="line-height-1 text-title text-18 mt-2 mb-0">{{userCounts[12].count + userCounts[13].count }}</p>
               </b-card>
             </b-col>
             <b-col lg="4" md="6" sm="6">
@@ -137,7 +142,7 @@
                 <p class="text-muted mt-2 mb-2">
                   Second Officer
                 </p>
-                <p class="line-height-1 text-title text-18 mt-2 mb-0">10</p>
+                <p class="line-height-1 text-title text-18 mt-2 mb-0">{{userCounts[10].count || 0}}</p>
               </b-card>
             </b-col>
             <b-col lg="4" md="6" sm="6">
@@ -146,7 +151,7 @@
                 <p class="text-muted mt-2 mb-2">
                   Chief Officer
                 </p>
-                <p class="line-height-1 text-title text-18 mt-2 mb-0">7</p>
+                <p class="line-height-1 text-title text-18 mt-2 mb-0">{{userCounts[2].count || 0}}</p>
               </b-card>
             </b-col>
           </b-row>
@@ -212,6 +217,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   metaInfo: {
     // if no subcomponents specify a metaInfo.title, this title will be used
@@ -228,6 +235,14 @@ export default {
         TopBasicCauses,
         ActivitiesWithPPEIssues,
         PSCDEfRatio,
+        program_count: '',
+        form: {
+          year:'',
+        },
+        years: [
+          {value: 2020, text:2020},
+          {value: 2021, text:2021},
+        ],
         columns: [
         {
           label: "Sr. No.",
@@ -294,6 +309,35 @@ export default {
         ]
     }
   },
+
+   mounted() {
+    this.year = '2021';
+    this.getData(this.year);
+  },
+  methods: {
+    async getData(year) {
+      // console.log(year);
+      this.isLoading = true;
+      // this.userCounts = [];
+      let userCounts = await axios.get(
+        `/user_counts?year=${year}`
+      );
+      this.userCounts = userCounts.data.data;
+      this.program_count = userCounts.data.program_count;
+      // this.DeckCadets = this.userCounts[3].count
+      // this.EngineCadets = this.userCounts[4].count
+      // this.FourthEngineer = this.userCounts[6].count
+      // this.ThirdEngineer = this.userCounts[11].count
+      // this.SecondEngineer = this.userCounts[9].count
+      // this.ChiefEngineer = this.userCounts[1].count
+      // this.ThirdOfficer = this.userCounts[12].count + userCounts[13].count
+      // this.SecondOfficer = this.userCounts[10].count
+      // this.ChiefOfficer = this.userCounts[2].count
+      // this.count = userCounts.data.count;
+      // this.serialNoStarting = (page - 1) * this.rowsPerPage;
+      this.isLoading = false;
+    },
+  }
 };
 
 // start::TopBasicCauses

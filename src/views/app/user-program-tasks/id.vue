@@ -9,6 +9,17 @@
       <b-col md="9">
         <b-card>
           <b-form @submit.prevent="submit">
+            <b-form-group label="Ship">
+              <vue-tags-input
+                v-model="searchShip"
+                :tags="selectedShip"
+                class="tag-custom text-15 mb-2"
+                :autocomplete-items="filteredShipItems"
+                :add-only-from-autocomplete="true"
+                @tags-changed="(newTags) => (selectedShip = newTags)"
+                placeholder="Type Ship Name"
+              />
+            </b-form-group>
             <b-form-group label="Program Task">
               <vue-tags-input
                 v-model="searchProgramTask"
@@ -150,10 +161,16 @@ export default {
         marks_obtained: "",
         is_completed: "",
         completion_date: "",
+        ship_id: "",
       },
       submitStatus: null,
       searchProgramTask: "",
       selectedProgramTask: [],
+
+      searchShip: "",
+      selectedShip: [],
+      shipItems: [],
+
       program_taskItems: [],
     };
   },
@@ -164,6 +181,13 @@ export default {
           pt.text
             .toLowerCase()
             .indexOf(this.searchProgramTask.toLowerCase()) !== -1
+        );
+      });
+    },
+    filteredShipItems() {
+      return this.shipItems.filter((pt) => {
+        return (
+          pt.text.toLowerCase().indexOf(this.searchShip.toLowerCase()) !== -1
         );
       });
     },
@@ -183,8 +207,19 @@ export default {
     this.form.user_program_id = this.$route.params.user_program_id;
     this.form.site_id = this.site.id;
     this.getData();
+    this.getMasters();
   },
   methods: {
+    async getMasters() {
+      let masters = await axios.get(`user_program_tasks/masters`);
+      masters = masters.data;
+      masters.ships.forEach((ship) => {
+        this.shipItems.push({
+          id: ship.id,
+          text: ship.description,
+        });
+      });
+    },
     async getData() {
       this.isLoading = true;
       let form = await axios.get(
@@ -194,17 +229,24 @@ export default {
       this.form = form.data.data;
       this.user = this.form.user;
       this.program = this.form.program;
+      this.ship = this.form.ship;
       this.program_task = this.form.program_task;
       this.selectedProgramTask.push({
         id: this.program_task.id,
         text: this.program_task.task,
+      });
+      this.selectedShip.push({
+        id: this.ship.id,
+        text: this.ship.description,
       });
       this.isLoading = false;
     },
     //   validate form
     async submit() {
       console.log("submit!");
-
+      if (this.selectedShip[0]) {
+        this.form.ship_id = this.selectedShip[0].id;
+      }
       this.$v.$touch();
       if (this.$v.$invalid) {
         this.submitStatus = "ERROR";
@@ -219,7 +261,9 @@ export default {
           await this.handleFileUpload();
           this.submitStatus = "OK";
           // setTimeout(() => {
-            this.$router.push("/app/sites/");
+          this.$router.push(
+            `/app/user-program/${this.$route.params.user_program_id}/user-program-tasks/`
+          );
           // }, 1000);
           this.isLoading = false;
         } catch (e) {
@@ -250,7 +294,7 @@ export default {
             "Content-Type": "multipart/form-data",
           },
         })
-        .catch(function () {
+        .catch(function() {
           console.log("FAILURE!!");
         });
     },

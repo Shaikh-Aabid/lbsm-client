@@ -118,8 +118,8 @@
             class="btn-rounded d-none d-sm-block"
             :to="
               '/app/user-program/' +
-              user_program.id +
-              '/user-program-tasks/create'
+                user_program.id +
+                '/user-program-tasks/create'
             "
             ><i class="i-Add text-white mr-2"> </i>Add User Program Task
           </b-button>
@@ -131,14 +131,17 @@
             <a
               :href="
                 '/app/user-program/' +
-                user_program.id +
-                '/user-program-tasks/' +
-                props.row.id
+                  user_program.id +
+                  '/user-program-tasks/' +
+                  props.row.id
               "
             >
               <i class="i-Eraser-2 text-25 text-success mr-2"></i>
               {{ props.row.button }}</a
             >
+          </span>
+          <span v-if="props.column.field == 'ship' && props.row.ship">
+            {{ props.row.ship.description }}
           </span>
           <span v-if="props.column.field == 'program_task'">
             {{ props.row.program_task.task }}
@@ -153,24 +156,24 @@
             {{ props.row.completion_date }}
           </span>
           <span v-if="props.column.field == 'imagepath1'">
-              <a :href="mediaUrl + props.row.imagepath1" target="_blank">
-                {{ props.row.imagepath1 }}
-              </a>
+            <a :href="mediaUrl + props.row.imagepath1" target="_blank">
+              {{ props.row.imagepath1 }}
+            </a>
           </span>
           <span v-if="props.column.field == 'imagepath2'">
-              <a :href="mediaUrl + props.row.imagepath2" target="_blank">
-                {{ props.row.imagepath2 }}
-              </a>
+            <a :href="mediaUrl + props.row.imagepath2" target="_blank">
+              {{ props.row.imagepath2 }}
+            </a>
           </span>
           <span v-if="props.column.field == 'imagepath3'">
-              <a :href="mediaUrl + props.row.imagepath3" target="_blank">
-                {{ props.row.imagepath3 }}
-              </a>
+            <a :href="mediaUrl + props.row.imagepath3" target="_blank">
+              {{ props.row.imagepath3 }}
+            </a>
           </span>
           <span v-if="props.column.field == 'imagepath4'">
-              <a :href="mediaUrl + props.row.imagepath4" target="_blank">
-                {{ props.row.imagepath4 }}
-              </a>
+            <a :href="mediaUrl + props.row.imagepath4" target="_blank">
+              {{ props.row.imagepath4 }}
+            </a>
           </span>
         </template>
       </vue-good-table>
@@ -188,6 +191,10 @@ export default {
   data() {
     return {
       columns: [
+        {
+          label: "Ship",
+          field: "ship",
+        },
         {
           label: "Program Tasks",
           field: "program_task",

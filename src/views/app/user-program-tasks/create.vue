@@ -9,6 +9,17 @@
       <b-col md="9">
         <b-card>
           <b-form @submit.prevent="submit">
+            <b-form-group label="Ship">
+              <vue-tags-input
+                v-model="searchShip"
+                :tags="selectedShip"
+                class="tag-custom text-15 mb-2"
+                :autocomplete-items="filteredShipItems"
+                :add-only-from-autocomplete="true"
+                @tags-changed="(newTags) => (selectedShip = newTags)"
+                placeholder="Type Ship Name"
+              />
+            </b-form-group>
             <b-form-group label="Program Task">
               <vue-tags-input
                 v-model="searchProgramTask"
@@ -110,7 +121,7 @@
                 /><span class="slider"></span>
               </label>
             </b-form-group>
-            
+
             <b-button
               type="submit"
               variant="primary"
@@ -151,11 +162,17 @@ export default {
         marks_obtained: "",
         is_completed: "",
         completion_date: "",
+        ship_id: "",
       },
       submitStatus: null,
       searchProgramTask: "",
       selectedProgramTask: [],
       program_taskItems: [],
+
+      searchShip: "",
+      selectedShip: [],
+      shipItems: [],
+
       user_program_task: [],
     };
   },
@@ -166,6 +183,13 @@ export default {
           pt.text
             .toLowerCase()
             .indexOf(this.searchProgramTask.toLowerCase()) !== -1
+        );
+      });
+    },
+    filteredShipItems() {
+      return this.shipItems.filter((pt) => {
+        return (
+          pt.text.toLowerCase().indexOf(this.searchShip.toLowerCase()) !== -1
         );
       });
     },
@@ -187,6 +211,15 @@ export default {
   },
   methods: {
     async getMasters() {
+      let masters = await axios.get(`user_program_tasks/masters`);
+      masters = masters.data;
+      masters.ships.forEach((ship) => {
+        this.shipItems.push({
+          id: ship.id,
+          text: ship.description,
+        });
+      });
+
       let user_program = await axios.get(
         `/user_programs/${this.$route.params.user_program_id}`
       );
@@ -217,7 +250,9 @@ export default {
       this.form.user_id = this.user_program.user_id;
       this.form.program_id = this.user_program.program_id;
       this.form.program_task_id = this.selectedProgramTask[0].id;
-
+      if (this.selectedShip[0]) {
+        this.form.ship_id = this.selectedShip[0].id;
+      }
       this.$v.$touch();
       if (this.$v.$invalid) {
         this.submitStatus = "ERROR";
@@ -262,7 +297,7 @@ export default {
             "Content-Type": "multipart/form-data",
           },
         })
-        .catch(function () {
+        .catch(function() {
           console.log("FAILURE!!");
         });
     },
